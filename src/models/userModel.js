@@ -3,18 +3,27 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema( {
     firstName: String,
     lastName: String,
-    mobile: {
-        type: String,
-
-        required: true
+    mobile: String,
+    emailId:{
+     type: String,
+     required:true
     },
-    emailId: String,
-    password: String,
-    gender: {
+    password: {
+     type: String,
+     required:true,
+    },
+    gender:{
         type: String,
         enum: ["male", "female", "other"]
     },
     age: Number,
-}, { timestamps: true });
+posts:{
+    type:[],
+    default:[],
+},
 
-module.exports = mongoose.model('User', userSchema)
+  timestamps: true ,
+    }
+);
+
+module.exports = mongoose.model('User2', userSchema)
