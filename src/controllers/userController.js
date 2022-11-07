@@ -1,58 +1,84 @@
-const userModel = require("../models/Newuser");
 const jwt = require("jsonwebtoken");
-const Newuser = require("../models/Newuser");
+const userModel = require("../models/userModel");
 
 
-
-const createUser = async function (req,res) {
- const data=req.body;
- const savedData=await Newuser.create(data)
- res.send(savedData)
+const createUser = async function (req, res) {
+   let data = req.body;
+  let savedData = await userModel.create(data);
+  res.send({ msg: savedData });
 };
 
-const login= async function (req, res) {
- const userName = req.body.emailId;
-  const password = req.body.password;
+const loginUser = async function (req, res) {
+  let userName = req.body.emailId;
+  let password = req.body.password;
+
   let user = await userModel.findOne({ emailId: userName, password: password });
-  if (!user){
-    return res.send({ msg:"username & the password must be required" });
-  }
-  
-  let token = jwt.sign({userId: user._id.toString()},"preeti");
-res.setHeader("x-auth-token", token);
-res.send({data:token  });
+  if (!user)
+    return res.send({
+      status: false,
+      msg: "username or the password is not correct",
+    });
+
+  let token = jwt.sign(
+    {
+      userId: user._id.toString(),
+    },
+    "lithium-rupam"
+  );
+  res.setHeader("x-auth-token", token);
+  res.send({ status: true, token: token });
 };
 
-const updatedUserData= async (req, res) => {
-  let UserId =req.params.userId;
-  let UserDetails =await userModel.findById(userId)
-  if (!UserDetails) 
-  return res.send({status:false,msg:"NO SUCH USER EXISTS"});
-let userData=req.body;
-let updatedUser=await Newuser.findOneAndUpdate(
-  {_id:userId},
-userData,
-{new:true}
-);
-res.send({status:true,data:updateUser})
-}
+const getUserData = async function (req, res) {
+  try {
+    let token = req.headers["x-auth-token"];
+    if (!token)
+      return res.send({ status: false, msg: "token must be present" });
+    console.log(token);
+    let decodedToken = jwt.verify(token, "lithium-rupam");
+    if (!decodedToken)
+      return res.send({ status: false, msg: "token is invalid" });
 
-const userPost=async (req,res)=>{
-  let user=await Newuser.findById(req.params.userId);
-  const message=req.body.message;
-  const updatedpost=user.posts;
-  updatedpost.push(message)
-  const updateData =await Newuser.findOneAndUpdate(
-   {_id:user._id} ,
-   {posts:updatedpost},
-   {
-    new:true,
-   }
+    let userId = req.params.userId;
+    let userDetails = await userModel.findById(userId);
+    if (!userDetails)
+      return res.send({ status: false, msg: "No such user exists" });
+
+    res.send({ status: true, data: userDetails });
+  } catch (error) {
+    return res.send("User ID is Incorrect ");
+  }
+
+};
+
+const updateUser = async function (req, res) {
+  let userId = req.params.userId;
+  let user = await userModel.findById(userId);
+  if (!user) {
+    return res.send("No such user exists");
+  }
+
+  let userData = req.body;
+  let updatedUser = await userModel.findOneAndUpdate({ _id: userId }, userData);
+  res.send({ status: updatedUser, data: updatedUser });
+};
+
+const deletedSchoolData = async (req, res) => {
+  let userId = req.params.userId;
+  let user = await userModel.findById(userId);
+  if (!user) {
+    return res.send(`No such ${user} exists`);
+  }
+  let deletedUser = await userModel.findOneAndUpdate(
+    { _id: user },
+    { $set: { isDeleted: true } }
   );
-  res.send({status:true,posts:updateData});
-}
+  res.send({ status: true, data: deletedUser });
+};
 
 module.exports.createUser = createUser;
-module.exports.login =login  ;
-module.exports.userPost= userPost;
-module.exports.updatedUserData=updatedUserData;
+module.exports.getUserData = getUserData;
+module.exports.updateUser = updateUser;
+module.exports.loginUser = loginUser;
+module.exports.deletedSchoolData = deletedSchoolData;
+
