@@ -1,25 +1,28 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const CowinController= require("../controllers/cowinController");
-const  memescontroller= require("../controllers/memes");
-const weathercontroller=require("../controllers/weathercontroller")
+const cowinController = require("../controllers/cowinController");
+const weathercontroller = require("../controllers/weathercontroller");
+const memes= require("../controllers/memes");
 
 
-router.get("/test-me", function (req, res) {
-    res.send("My first ever api!")
-})
+//1
+router.get("/cowin/states", cowinController.getStates);
+router.get("/cowin/districtsInState/:stateId", cowinController.getDistricts);
+router.get("/cowin/getByPin", cowinController.getByPin);
+router.post("/cowin/getOtp", cowinController.getOtp);
+router.get("/getByDistrictId", cowinController.getByDistrictId);
 
+//2
+router.get("/weather/london",weathercontroller.getLondonWeather);
+router.get("/weather/london/temperature", weathercontroller.getLondonTemperature);
+router.get("/getSelectedCities", weathercontroller.getSelectedCities);
 
-router.get("/cowin/states", CowinController.getStates)
-router.get("/cowin/districtsInState/:stateId", CowinController.getDistricts)
-router.get("/cowin/getByPin", CowinController.getByPin)
-
-router.post("/cowin/getOtp", CowinController.getOtp)
-router.post("/memes",memescontroller.memes)
-router.get("/weather/london",weathercontroller.getlondonweather)
-router.get("/weather/london/tempature",weathercontroller.londonTemp)
-// WRITE A GET API TO GET THE LIST OF ALL THE "vaccination sessions by district id" for any given district id and for any given date
-
-
-
+//3
+router.post("/meme", memes.meme);
 module.exports = router;
+
+
+
+
+
+
