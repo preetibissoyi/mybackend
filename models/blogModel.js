@@ -16,7 +16,7 @@ authorId:{
 tags:{type:[String],trim:true},
 category:{type:[String],trim:true,required:true},
 subcategory:{type:[String],trim:true},
-isDeleted:{type:Boolean,default:true,},
+isDeleted:{type:Boolean,default:false},
 publishedAt:{type:String,default:null},
 isPublished:{type:Boolean,default:false},
     
