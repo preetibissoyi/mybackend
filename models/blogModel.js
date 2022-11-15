@@ -8,6 +8,10 @@ title:{
    required:true,
    trim:true
 },
+body:{
+  type:String,
+  required:true,
+},
 authorId:{
   type:ObjectId,
   required:true,
@@ -17,7 +21,8 @@ tags:{type:[String],trim:true},
 category:{type:[String],trim:true,required:true},
 subcategory:{type:[String],trim:true},
 isDeleted:{type:Boolean,default:false},
-publishedAt:{type:String,default:null},
+deletedAt:{type:String},
+publishedAt:{type:String},
 isPublished:{type:Boolean,default:false},
     
 },{ timestamps: true }
