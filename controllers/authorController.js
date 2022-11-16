@@ -74,11 +74,12 @@
 
 // module.exports.createAuthor = createAuthor
 
-
+const jwt= require("jsonwebtoken")
 
 const validation  = require("../validator/validation");
 
 const AuthorModel = require("../models/authorModel.js");
+
 
 
 let { isValidName, isValidEmail, isValidPassword, isEmpty } = validation //Destructuring
@@ -147,4 +148,19 @@ const createAuthor= async function(req,res){ // Checking body is empty or not
     
 }
 
+const loginAuthor= async function(req,res){
+ let email= req.body.email
+ let password= req.body.password
+ let author= await AuthorModel.findOne({email:email,password:password})
+ if(!author){
+    return res.status(400).send({status:false,msg:"credential are not matched"})
+ }    
+ let token= jwt.sign({authorId:author._id},"Project-1-Blog")
+ res.setHeader("x-api-key",token)
+ res.send({status:true,data:token})
+}
+
+
+
 module.exports.createAuthor = createAuthor
+module.exports.loginAuthor=loginAuthor
