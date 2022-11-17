@@ -1,85 +1,8 @@
-// const validation  = require("../validator/validation");
-// const authors = require("../models/authorModel.js");
-
-// let {isEmpty, isValidName, isValidEmail, isValidObjectId, isValidPassword} = validation
-
-// const createAuthor= async function(req,res){
-//     try{
-//         let data = req.body
-//     if(Object.keys(data).length==0){
-//         return res.status(400).send({ststus:false,message:"Body is empty"})
-//     }
-
-//     let {fname,lname,title,email,password} = data
-
-//     if(!fname||!lname||!title||!email||!password) {
-//         return res.status(400).send({status:false,message:"this field is required"})
-//     }
-
-//     if(!isEmpty(fname)){
-//         return res.status(400).send({status:false,message:"First Name is required"})
-//     }
-//     if(!isEmpty(lname)){
-//         return res.status(400).send({status:false,message:"Last Name is required"})
-//     }
-//     if(!isEmpty(title)){
-//         return res.status(400).send({status:false,message:"title  is required"})
-//     }
-//     if(!isEmpty(email)){
-//         return res.status(400).send({status:false,message:"Email is required"})
-//     }
-//     if(!isEmpty(password)){
-//         return res.status(400).send({status:false,message:"password is required"})
-//     }
-
-//     if(title != "Mr" && title != "Mrs" && title != "Miss"){
-//         res.status(400).send({msg:"Not have appropiate title"})
-//     }
-
-//     if(!isValidName(fname)){
-//         return res.status(400).send({status:false,message:"fname is Wrong"})
-//     }
-
-//     if(!isValidName(lname)){
-//         return res.status(400).send({status:false,message:"lname is wrong"})
-//     }
-
-//    // if (!checkValid(email)) return res.status(400).send({ status: false, message: "Spaces aren't Allowed." })
-//     if (!(/^\w+([\.-]?\w+)@\w+([\.-]?\w+)(\.\w{2,3})+$/).test(email)) { 
-//         return res.status(400).send({ status: false, msg: "Please provide valid Email" })
-//  }
-
-
-//     // if (!(/^(?=.[A-Z])(?=.[a-z])(?=.[0-9])(?=.[!@#$%^&])[a-zA-Z0-9!@#$%^&]{8,32}$/).test(password)) {
-//     //      return res.status(400).send({ status: false, msg: "Your password must be at least 6 characters long, contain at least one number and symbol, and have a mixture of uppercase and lowercase letters." }) }
-
-//     // if(!isValidEmail(email)){
-//     //     return res.status(400).send({status:false,message:"Email is wrong"})
-//     // }
-
-
-//     if(!isValidPassword(password)){
-//         return res.status(400).send({status:false,message:"Password is wrong"})
-//     }
-    
-
-//     let authorCreate = await authors.create(data)
-//     res.status(201).send({status:true,data:authorCreate})
-//     }
-//     catch(error){
-//           res.status(500).send({status:true,message:error.message})
-//     }
-    
-// }
-
-// module.exports.createAuthor = createAuthor
-
-const jwt= require("jsonwebtoken")
-
 const validation  = require("../validator/validation");
 
-const AuthorModel = require("../models/authorModel.js");
+const authors = require("../models/authorModel.js");
 
+const jwt = require("jsonwebtoken");
 
 
 let { isValidName, isValidEmail, isValidPassword, isEmpty } = validation //Destructuring
@@ -97,7 +20,7 @@ const createAuthor= async function(req,res){ // Checking body is empty or not
         return res.status(400).send({status:false,message:"all fields must be required"})
     }
 
-//------------------------Checking attributes are empty or not-----------------------------------/
+/*------------------------Checking attributes are empty or not-----------------------------------*/
 
     if(!isEmpty(fname)){
         return res.status(400).send({status:false,message:"First Name is required"})
@@ -115,7 +38,7 @@ const createAuthor= async function(req,res){ // Checking body is empty or not
         return res.status(400).send({status:false,message:"password is required"})
     }
 
-//-----------------------------------Checking Valid Title or Not------------------------------------------------/
+/*-----------------------------------Checking Valid Title or Not------------------------------------------------*/
 
     if(title != "Mr" && title != "Mrs" && title != "Miss"){
         res.status(400).send({msg:"Not have appropiate title"})
@@ -134,12 +57,12 @@ const createAuthor= async function(req,res){ // Checking body is empty or not
     }
 
     if(!isValidPassword(password)){ // Password validation
-        return res.status(400).send({status:false,message:"Your password must have characters, contain at least one number and symbol, and have a mixture of uppercase and lowercase letters."})
+        return res.status(400).send({status:false,message:"Your password must have characters, contain at least one number or symbol, and have a mixture of uppercase and lowercase letters."})
     }
     
-    //-----------------------------------CREATING AUTHOR-----------------------------------------------------/
+    /*-----------------------------------CREATING AUTHOR-----------------------------------------------------*/
 
-    let autherCreate = await AuthorModel.create(data)
+    let autherCreate = await authors.create(data)
     res.status(201).send({status:true,data:autherCreate})
     }
     catch(error){
@@ -148,19 +71,52 @@ const createAuthor= async function(req,res){ // Checking body is empty or not
     
 }
 
-const loginAuthor= async function(req,res){
- let email= req.body.email
- let password= req.body.password
- let author= await AuthorModel.findOne({email:email,password:password})
- if(!author){
-    return res.status(400).send({status:false,msg:"credential are not matched"})
- }    
- let token= jwt.sign({authorId:author._id},"Project-1-Blog")
- res.setHeader("x-api-key",token)
- res.send({status:true,data:token})
-}
+/* --------------------------------------------------AUTHOR-LOGIN---------------------------------------------- */
 
+const loginAuthor = async function (req, res) {
+
+    try{
+
+        let emailId = req.body.emailId;
+    let password = req.body.password;
+
+    if(!isValidEmail(emailId)){ // Email validation
+        return res.status(400).send({status:false,message:"Please provide valid Email"})
+    }
+
+    if(!isValidPassword(password)){ // Password validation
+        return res.status(400).send({status:false,message:"Your password must have characters, contain at least one number or symbol, and have a mixture of uppercase and lowercase letters."})
+    }
+  
+    let author = await authors.findOne( { emailId: emailId, password: password } );
+    if (!author)
+      return res.send( { status: false, msg: "username or the password is not corerct" } );
+  
+    let token = jwt.sign(
+      {
+        authorId: author._id.toString(),
+        batch: "Lithium",
+        organisation: "FunctionUp",
+        name:"Raj Nagwanshi, Anshika, Preeti Bissoyi, Monalisa Ganguli"
+      },
+      "functionup-lithium-very-very-secret-key"
+    );
+    res.setHeader("x-auth-token", token);
+    res.status(200).send({ status: true, token: token });
+
+    }
+      catch(error){
+        res.status(500).send({msg:error.message})
+      }
+    
+  };
 
 
 module.exports.createAuthor = createAuthor
-module.exports.loginAuthor=loginAuthor
+
+module.exports.loginAuthor = loginAuthor
+
+
+
+
+

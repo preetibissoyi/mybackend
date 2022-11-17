@@ -1,14 +1,13 @@
 const mongoose = require("mongoose")
 
-
-//-----------------------------------NAME VALIDATION-----------------------------------------------------/
+/*-----------------------------------NAME VALIDATION-----------------------------------------------------*/
 
 const isValidName = function (name){
-    const nameRegex = /^[a-zA-Z ]+$/;
+    const nameRegex = /^[a-zA-Z][a-zA-Z\\s]+$/;
     return nameRegex.test(name);
 };
 
-//-----------------------------------EMAIL VALIDATION-----------------------------------------------------/
+/*-----------------------------------EMAIL VALIDATION-----------------------------------------------------*/
  
 const isValidEmail = function(email) {
     const emailRegex =
@@ -16,17 +15,16 @@ const isValidEmail = function(email) {
     return emailRegex.test(email);
 };
 
-//-----------------------------------------PASSWORD VALIDATION-----------------------------------------------/
+/*-----------------------------------------PASSWORD VALIDATION-----------------------------------------------*/
  
 const isValidPassword = function(password) {
     const passwordRegex =
     /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
-
-    return passwordRegex.test(password);   
+    return passwordRegex.test(password);
 
 };
 
-//---------------------------------------------VALUE VALIDATION-------------------------------------------/
+/*---------------------------------------------VALUE VALIDATION-------------------------------------------*/
  
 const isEmpty = function (value){
     if (typeof value === "undefined"|| value === null) return false;
@@ -34,6 +32,11 @@ const isEmpty = function (value){
     return true;
 };
 
+/*---------------------------------------------OBJECT-ID VALIDATION-------------------------------------------*/
 
-module.exports = {isEmpty, isValidName, isValidEmail, isValidPassword}
+const isValidObjectId = (objectId) => {
+    return mongoose.Types.ObjectId.isValid(objectId)
+}
 
+
+module.exports = {isEmpty, isValidName, isValidEmail, isValidPassword, isValidObjectId}

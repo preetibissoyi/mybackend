@@ -1,5 +1,6 @@
 const jwt= require("jsonwebtoken")
-const blogModel = require("../models/blogModel")
+
+/* ----------------------------------------------AUTHENTICATION---------------------------------------- */
 
 const authenticate= async function(req,res,next){
     try{
@@ -7,43 +8,56 @@ const authenticate= async function(req,res,next){
    if(!token){
     return res.status(400).send({status:false,msg:"token must be present"})
    }
-   let verifyToken= jwt.verify(token,"Project-1-Blog")
+   let verifyToken= jwt.verify(token,"functionup-lithium-very-very-secret-key")
    if(!verifyToken){
     return res.status(401).send({status:false,msg:"token is invalid"})
    }
    req.verifyToken=verifyToken
+   console.log("Authentication successfull")
 }
 catch(error){
     res.status(500).send({status:false,msg:error.message})
+    console.log("Authentication Failed")
 }
 next()
 }
 
-//--------------------------------------auth 2 for delete document-------------------------------------
+
+/* -----------------------------------------AUTHORISATION----------------------------------------------------- */
+
 
 const auth2= async function(req,res,next){
+
     try{
         let token= req.headers["x-api-key"]
+
         console.log(token)
+
         if(!token){
          return res.status(400).send({status:false,msg:"token must be present"})
         }
 
-        let verifyToken= jwt.verify(token,"Project-1-Blog")
+        let verifyToken= jwt.verify(token,"functionup-lithium-very-very-secret-key")
+
         if(!verifyToken){
          return res.status(400).send({status:false,msg:"token is invalid"})
         }
 
-        const{category, authorId, tags, subcategory}=req.query
+        const{ authorId } = req.body
+
          let  loggedinAuthor= verifyToken.authorId.toString()
-         if(authorId !==loggedinAuthor){
+
+         if(authorId !== loggedinAuthor){
             return res.status(403).send({status:false,msg:"author is not allowed for this request"})
-         }
-         next()
+           }
+           console.log("Authorise successfull")
         }
+
   catch(error){
     res.status(500).send({status:false,msg:error.message})
   }
+
+  next()
 }
  
 
@@ -51,5 +65,6 @@ const auth2= async function(req,res,next){
 
 
 module.exports.authenticate=authenticate
-//module.exports.auth1=auth1
+
+
 module.exports.auth2=auth2
