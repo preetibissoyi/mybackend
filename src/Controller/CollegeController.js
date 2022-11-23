@@ -1,4 +1,4 @@
-const collageModel = require("../model/CollegeModel");
+const collegeModel = require("../model/CollegeModel");
 const InternModel = require("../model/InternModel");
 
 const {
@@ -7,15 +7,16 @@ const {
   isValidFullName,
 } = require("../validator/validator");
 
-
 // API MADE BY JIVAN
 const CreateCollege = async function (req, res, next) {
   try {
-    const collage = await collageModel.create(req.body);
+    const collage = await collegeModel.create(req.body);
     res.status(201).json({
       status: true,
       data: {
-        collage,
+        logoLink: collage.logoLink,
+        fullName: collage.fullName,
+        name: collage.name,
       },
     });
   } catch (error) {
@@ -23,7 +24,6 @@ const CreateCollege = async function (req, res, next) {
   }
 };
 // JIVAN
-
 
 //****************************************************************************************/
 const collegeDetails = async function (req, res) {
@@ -41,9 +41,11 @@ const collegeDetails = async function (req, res) {
     if (!isValidShortName(collegeName))
       return res.status(400).send({ status: false, msg: "invalid collegName" });
 
-    let college = await CollegeModel.findOne({
-      name: collegeName.toLowerCase(),
-    }).select({ name: 1, fullName: 1, logoLink: 1 });
+    let college = await collegeModel
+      .findOne({
+        name: collegeName.toLowerCase(),
+      })
+      .select({ name: 1, fullName: 1, logoLink: 1 });
     if (!college)
       return res.status(400).send({ status: false, msg: "college not found" });
     let internName = await InternModel.find({ collegeId: college._id }).select({
@@ -53,12 +55,10 @@ const collegeDetails = async function (req, res) {
       _id: 1,
     });
     if (internName.length === 0)
-      return res
-        .status(404)
-        .send({
-          status: false,
-          message: "there is no students is applied for internship",
-        });
+      return res.status(404).send({
+        status: false,
+        message: "there is no students is applied for internship",
+      });
     let allInterns = {
       name: college.name,
       fullName: college.fullName,
